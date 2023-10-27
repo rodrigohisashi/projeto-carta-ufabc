@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+using UnityEngine.SceneManagement;
 
 public class Garimpeiro : MonoBehaviour
 {
@@ -59,6 +62,12 @@ public class Garimpeiro : MonoBehaviour
         layout.ReadLayout(layoutXML.text);
         monte = ConverteListCartasToListCartasGarimpeiro(baralho.cartasBaralho);
         LayoutGame();
+        // if (target == null) {
+        //     MoveParaTarget(Draw());
+        //     MoveParaDescarte(target);
+        //     UpdateMonte();
+
+        // }
 
     }
 
@@ -83,6 +92,14 @@ public class Garimpeiro : MonoBehaviour
             cp.SetSortingLayerName(tSD.layerName);
             tablado.Add(cp);
         }
+        foreach (CartaGarimpeiro tCP in tablado) {
+            foreach( int hid in tCP.slotDef.hiddenBy) {
+                cp = BuscaCartaPeloLayoutID(hid);
+                tCP.hiddenBy.Add(cp);
+            }
+        }
+        MoveParaTarget(Draw());
+        UpdateMonte();
 
     }
 
@@ -91,6 +108,145 @@ public class Garimpeiro : MonoBehaviour
         CartaGarimpeiro cd = monte[0];
         monte.RemoveAt(0);
         return(cd);
+    }
+
+    void MoveParaDescarte(CartaGarimpeiro ct) {
+        ct.state = eCartaState.descarte;
+        descarte.Add(ct);
+        ct.transform.parent = pivoBaralho;
+        ct.transform.localPosition = new Vector3(
+            layout.multiplicador.x * layout.descarte.x,
+            layout.multiplicador.y * layout.descarte.y,
+            -layout.descarte.layerID+0.5f);
+        ct.faceUp = true;
+        ct.SetSortingLayerName(layout.descarte.layerName);
+        ct.SetSortOrder(-100+descarte.Count);
+   
+    }
+
+    void MoveParaTarget(CartaGarimpeiro ct) {
+        if (target != null) MoveParaDescarte(target);
+        target = ct;
+        ct.state = eCartaState.target;
+        ct.transform.parent = pivoBaralho;
+        ct.transform.localPosition = new Vector3(
+            layout.multiplicador.x * layout.descarte.x,
+            layout.multiplicador.y * layout.descarte.y,
+            -layout.descarte.layerID
+        );
+        ct.faceUp = true;
+        ct.SetSortingLayerName(layout.descarte.layerName);
+        ct.SetSortOrder(0);
+
+    }
+
+    void UpdateMonte() {
+        CartaGarimpeiro ct;
+        for (int i=0; i<monte.Count; i++) {
+            ct = monte[i];
+            ct.transform.parent = pivoBaralho;
+            Vector2 dpSepara = layout.monte.espaco;
+            ct.transform.localPosition = new Vector3(
+                layout.multiplicador.x * (layout.monte.x + i*dpSepara.x),
+                layout.multiplicador.y * (layout.monte.y + i*dpSepara.y),
+                -layout.monte.layerID+0.1f*i
+            );
+            ct.faceUp = false;
+            ct.state = eCartaState.monte;
+            ct.SetSortingLayerName(layout.monte.layerName);
+            ct.SetSortOrder(-10*i);
+        }
+    }
+
+    public void CartaClicada(CartaGarimpeiro ct) {
+   
+        print(ct);
+        switch(ct.state) {
+            case eCartaState.target:
+                break;
+            case eCartaState.monte:
+                MoveParaDescarte(target);
+                MoveParaTarget(Draw());
+                UpdateMonte();
+                ScoreManager.EVENT(eScoreEvent.monte);
+                break;
+            case eCartaState.tablado:
+                bool jogadaValida = true;
+                if (!ct.faceUp) {
+                    jogadaValida = false;
+                }
+                if (!ValorAdjacente(ct, target)) {
+                    jogadaValida = false;
+                }
+                if (!jogadaValida) return;
+                tablado.Remove(ct);
+                MoveParaTarget(ct);
+                SetFacesTablado();
+                ScoreManager.EVENT(eScoreEvent.mina);
+                break;
+        }
+        VerificaGameOver();
+    }
+
+    void VerificaGameOver() {
+        if (tablado.Count==0) {
+            GameOver(true);
+            return;
+        }
+        if (monte.Count>0) {
+            return;
+        }
+        foreach (CartaGarimpeiro ct in tablado) {
+            if (ValorAdjacente (ct, target)) {
+                return;
+            }
+        }
+        GameOver(false);
+    }
+
+    void GameOver(bool won) {
+        if (won) {
+           // print ("Game Over. Você VENCEU! :)");
+           ScoreManager.EVENT(eScoreEvent.gameVitoria);
+        } else {
+            // print ("Game Over. Derrota ... :(");
+            ScoreManager.EVENT(eScoreEvent.gameDerrota);
+        }
+        SceneManager.LoadScene("GarimpeiroGameplay");
+    }
+
+    public bool ValorAdjacente(CartaGarimpeiro c0, CartaGarimpeiro c1) {
+        if (!c0.faceUp || !c1.faceUp) return (false);
+        if (Math.Abs(c0.valor - c1.valor) == 1) {
+            return(true);
+        }
+        if (c0.valor == 1 && c1.valor == 13) return (true);
+
+        if (c0.valor == 13 && c1.valor == 1) return (true);
+        return (false);
+
+
+    }
+
+    CartaGarimpeiro BuscaCartaPeloLayoutID(int layoutID) {
+        foreach(CartaGarimpeiro tCP in tablado) {
+            if (tCP.layoutID == layoutID) {
+                return (tCP);
+            }
+        }
+        return (null);
+    }
+
+    void SetFacesTablado() {
+        foreach(CartaGarimpeiro ct in tablado) {
+            bool faceUp = true;
+            foreach (CartaGarimpeiro cover in ct.hiddenBy ) {
+                if (cover.state == eCartaState.tablado) {
+                    faceUp = false;
+                }
+            }
+            ct.faceUp = faceUp;
+        }
     }
 
 

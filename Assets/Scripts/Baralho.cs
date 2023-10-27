@@ -20,6 +20,7 @@ public class Baralho : MonoBehaviour
     void Start()
     {
         InicioBaralho();
+        Embaralha(ref cartasBaralho);
     }
 
     public void InicioBaralho() {

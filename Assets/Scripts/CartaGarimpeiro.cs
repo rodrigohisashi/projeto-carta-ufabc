@@ -22,6 +22,9 @@ public class CartaGarimpeiro : Carta
 
     public SlotDef slotDef;
 
+    override public void OnMouseDown() {
+        Garimpeiro.S.CartaClicada(this);
+    }
 
     // Start is called before the first frame update
     void Start()
