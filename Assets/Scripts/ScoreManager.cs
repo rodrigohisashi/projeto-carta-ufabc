@@ -110,5 +110,33 @@ public class ScoreManager : MonoBehaviour
         
     }
 
-    
+    static public void SavePlayerScore(string playerName, int playerScore) {
+        // Crie uma lista de jogadores e pontuações se não existir
+        if (!PlayerPrefs.HasKey("PlayerList")) {
+            PlayerPrefs.SetString("PlayerList", "");
+        }
+
+        // Adicione o novo jogador e sua pontuação à lista existente
+        string playerList = PlayerPrefs.GetString("PlayerList");
+        playerList += playerName + ":" + playerScore.ToString() + ",";
+        PlayerPrefs.SetString("PlayerList", playerList);
+    }
+
+    // Adicione essa função para carregar o ranking de jogadores
+    static public string LoadPlayerScores() {
+        if (!PlayerPrefs.HasKey("PlayerList")) {
+            return "Nenhum registro encontrado";
+        }
+
+        // Obtenha a lista de jogadores e pontuações
+        string playerList = PlayerPrefs.GetString("PlayerList");
+        return playerList;
+    }
+
+      public static void ClearPlayerData()
+    {
+        // Lógica para limpar os dados de jogador, como excluir arquivos, limpar bancos de dados, ou reinicializar variáveis de armazenamento de dados.
+        // Por exemplo, se você estiver usando PlayerPrefs, pode usar o seguinte código para limpar os dados:
+        PlayerPrefs.DeleteAll();
+    }
 }

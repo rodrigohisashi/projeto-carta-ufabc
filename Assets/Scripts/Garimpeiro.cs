@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.SceneManagement;
+using TMPro;
+using UnityEngine.UI;
 
 public class Garimpeiro : MonoBehaviour
 {
@@ -56,6 +58,10 @@ public class Garimpeiro : MonoBehaviour
    public AudioClip musicaDerrota; // Adicione a música de vitória aqui no Editor do Unity
 
     private AudioSource audioSource; // Referência ao componente AudioSource
+    
+
+    public Button botaoEnviar;
+    public TMP_InputField inputField;
 
     void Awake() {
         S = this;
@@ -63,6 +69,13 @@ public class Garimpeiro : MonoBehaviour
         PanelPerder = GameObject.Find("PanelPerder"); 
         audioSource = GetComponent<AudioSource>(); // Obtém o componente AudioSource do objeto atual
      
+        // Encontre o botão pelo nome e adicione um ouvinte de clique
+        botaoEnviar = GameObject.Find("Enviar").GetComponent<Button>();
+        botaoEnviar.onClick.AddListener(EnviarNomeDoJogador);
+
+        // Encontre o InputField pelo nome
+        inputField = GameObject.Find("ColocarNome").GetComponent<TMP_InputField>();
+   
     }
 
     void Start() {
@@ -309,5 +322,23 @@ public class Garimpeiro : MonoBehaviour
     void Update()
     {
         
+    }
+
+        // Crie um método para enviar o nome do jogador
+    void EnviarNomeDoJogador() {
+        // Atribua o nome do jogador à variável
+        string nomeDoJogador = inputField.text; // Acesse o valor do texto do InputField
+
+        // Acesse o script ScoreManager e use a função SavePlayerScore para salvar o nome do jogador e a pontuação
+        ScoreManager.SavePlayerScore(nomeDoJogador, ScoreManager.SCORE_DA_PARTIDA_ANTERIOR);
+        print("Enviou");
+            // Desative os botões após o envio do nome do jogador
+        if (botaoEnviar != null) {
+            botaoEnviar.gameObject.SetActive(false);
+        }
+
+        if (inputField != null) {
+            inputField.gameObject.SetActive(false);
+        }
     }
 }

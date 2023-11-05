@@ -17,4 +17,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Creditos.unity
     guid: e281422e846246a4f994ca625da76258
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: f7e0543b348736042b20ae255e043bdf
+  - enabled: 1
+    path: Assets/Scenes/Ranking.unity
+    guid: e22fc1416bc02b54fab0040db33ae809
   m_configObjects: {}
