@@ -48,16 +48,28 @@ public class Garimpeiro : MonoBehaviour
 
     public List<CartaGarimpeiro> descarte;
 
+    static public GameObject PanelGanhar; // Painel a ser exibido quando o jogador ganha
 
+    static public GameObject PanelPerder; // Painel a ser exibido quando o jogador ganha
+
+   public AudioClip musicaDeVitoria; // Adicione a música de vitória aqui no Editor do Unity
+   public AudioClip musicaDerrota; // Adicione a música de vitória aqui no Editor do Unity
+
+    private AudioSource audioSource; // Referência ao componente AudioSource
 
     void Awake() {
         S = this;
+        PanelGanhar = GameObject.Find("PanelGanhar");
+        PanelPerder = GameObject.Find("PanelPerder"); 
+        audioSource = GetComponent<AudioSource>(); // Obtém o componente AudioSource do objeto atual
+     
     }
 
     void Start() {
         baralho = GetComponent<Baralho>();
         Baralho.Embaralha(ref cartasBaralho);
-
+        PanelGanhar.SetActive(false);
+        PanelPerder.SetActive(false);
         layout = GetComponent<Layout>();
         layout.ReadLayout(layoutXML.text);
         monte = ConverteListCartasToListCartasGarimpeiro(baralho.cartasBaralho);
@@ -105,11 +117,16 @@ public class Garimpeiro : MonoBehaviour
 
 
     CartaGarimpeiro Draw() {
-        CartaGarimpeiro cd = monte[0];
-        monte.RemoveAt(0);
-        return(cd);
+        if (monte.Count > 0) {
+            CartaGarimpeiro cd = monte[0];
+            monte.RemoveAt(0);
+            return cd;
+        } else {
+            Debug.LogWarning("Tentativa de desenhar de uma monte vazia.");
+            return null; // ou faça outra ação apropriada quando o monte estiver vazio
+        }
     }
-
+    
     void MoveParaDescarte(CartaGarimpeiro ct) {
         ct.state = eCartaState.descarte;
         descarte.Add(ct);
@@ -161,16 +178,21 @@ public class Garimpeiro : MonoBehaviour
     public void CartaClicada(CartaGarimpeiro ct) {
    
         print(ct);
+        print("caso " + ct.state);
         switch(ct.state) {
             case eCartaState.target:
                 break;
             case eCartaState.monte:
+                   if (monte.Count > 0) {
+                    
                 MoveParaDescarte(target);
                 MoveParaTarget(Draw());
                 UpdateMonte();
                 ScoreManager.EVENT(eScoreEvent.monte);
+                }
                 break;
             case eCartaState.tablado:
+                print("AAA");
                 bool jogadaValida = true;
                 if (!ct.faceUp) {
                     jogadaValida = false;
@@ -179,6 +201,7 @@ public class Garimpeiro : MonoBehaviour
                     jogadaValida = false;
                 }
                 if (!jogadaValida) return;
+                print("DEU ERRADO");
                 tablado.Remove(ct);
                 MoveParaTarget(ct);
                 SetFacesTablado();
@@ -208,11 +231,31 @@ public class Garimpeiro : MonoBehaviour
         if (won) {
            // print ("Game Over. Você VENCEU! :)");
            ScoreManager.EVENT(eScoreEvent.gameVitoria);
+            if (PanelGanhar != null)
+            {
+                PanelGanhar.SetActive(true); // Ative o painel quando o jogador ganhar
+            }
+                // Tocar música de vitória
+            if (musicaDeVitoria != null)
+            {
+                audioSource.Stop(); // Para a música de fundo atual, se houver alguma
+                audioSource.clip = musicaDeVitoria; // Define a música de vitória como o clipe de áudio
+                audioSource.Play(); // Toca a música de vitória
+            }
         } else {
             // print ("Game Over. Derrota ... :(");
             ScoreManager.EVENT(eScoreEvent.gameDerrota);
+            if (PanelPerder != null)
+            {
+                PanelPerder.SetActive(true); // Ative o painel quando o jogador ganhar
+            }
+             if (musicaDerrota != null)
+            {
+                audioSource.Stop(); // Para a música de fundo atual, se houver alguma
+                audioSource.clip = musicaDerrota; // Define a música de vitória como o clipe de áudio
+                audioSource.Play(); // Toca a música de vitória
+            }
         }
-        SceneManager.LoadScene("GarimpeiroGameplay");
     }
 
     public bool ValorAdjacente(CartaGarimpeiro c0, CartaGarimpeiro c1) {

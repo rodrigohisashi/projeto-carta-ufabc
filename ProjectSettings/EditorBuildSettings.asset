@@ -11,4 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GarimpeiroGameplay.unity
     guid: 189217950220e1044be928cd8658bc75
+  - enabled: 1
+    path: Assets/Scenes/MenuPrincipal.unity
+    guid: 31177c87f2418564aa8821e7fa746cae
+  - enabled: 1
+    path: Assets/Scenes/Creditos.unity
+    guid: e281422e846246a4f994ca625da76258
   m_configObjects: {}

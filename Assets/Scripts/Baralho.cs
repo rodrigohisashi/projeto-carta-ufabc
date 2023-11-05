@@ -71,7 +71,7 @@ public class Baralho : MonoBehaviour
         else numeroCarta = "" + _carta.valor;
         nomeDaCarta = numeroCarta + _carta.naipe;
         _tSp = (Sprite) (Resources.Load<Sprite>(nomeDaCarta));
-        Sprite s1back = (Sprite) (Resources.Load<Sprite>("Card_Back_1"));
+        Sprite s1back = (Sprite) (Resources.Load<Sprite>("CartaFundo"));
         _tSR.sprite = _tSp;
         _tSR.sortingOrder = 2;
         _tGO = Instantiate(prefabSprite) as GameObject;

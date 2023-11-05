@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI; 
 
 public enum eScoreEvent {
     monte, 
@@ -70,6 +71,18 @@ public class ScoreManager : MonoBehaviour
                     HIGH_SCORE = SCORE_DA_PARTIDA_ANTERIOR;
                     PlayerPrefs.SetInt("GarimpeiroHighScore", score);
                 }
+                print(Garimpeiro.PanelGanhar);
+       
+                Transform textoDoPainelTransform = Garimpeiro.PanelGanhar.transform.Find("PontuacaoFinal");
+                print(textoDoPainelTransform);
+     
+                TextMeshProUGUI textoMeshDoPainel = textoDoPainelTransform.GetComponent<TextMeshProUGUI>();
+                if (textoMeshDoPainel != null)
+                {
+                    textoMeshDoPainel.text = "PONTUAÇÃO FINAL: " + score.ToString();
+                }
+            
+                 
                 print("VITÓRIA! PONTOS DESTA PARTIDA: " + score);
                 break;
             case eScoreEvent.gameDerrota:
@@ -80,7 +93,7 @@ public class ScoreManager : MonoBehaviour
                 }
                 break;
             default:
-                scoreText.text = "Total: " + score.ToString() + " da rodada:" + scoreRodada.ToString() + ", série: " + serie.ToString();
+                scoreText.text = "Total: " + score.ToString() + " Rodada:" + scoreRodada.ToString() + " Série: " + serie.ToString();
                 break;
         }
     }
@@ -96,4 +109,6 @@ public class ScoreManager : MonoBehaviour
     {
         
     }
+
+    
 }
